@@ -10,3 +10,17 @@ body{
     min-height: 100vh;
 }
 
+.container{
+    flex: 1;
+}
+
+
+.success-box{
+    background-color: rgb(208, 255, 208);
+    color: rgb(0, 97, 0);
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    padding: 5px;
+    margin-bottom: 10px;
+}

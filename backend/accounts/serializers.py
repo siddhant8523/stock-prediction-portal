@@ -1,7 +1,20 @@
+from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
+
+    # Enforce uniqueness, required status, and valid email format
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="A user with that email already exists."
+            )
+        ]
+    )
+
     # Enforce write-only, require a minimum of 8 characters, 
     # and render as a hidden password input in the DRF browsable API.
     password = serializers.CharField(
