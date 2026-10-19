@@ -1,11 +1,16 @@
+
 import { useState } from "react";
 import { BeatLoader } from "react-spinners";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../axiosInstance";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState({});
   const [success, setSuccess] = useState(false);
@@ -16,6 +21,13 @@ function Register() {
 
     // Prevent duplicate submissions
     if (loading) return;
+
+    // Validate password confirmation before calling the API
+    if (password !== confirmPassword) {
+      setError({ confirmPassword: "Passwords do not match." });
+      setSuccess(false);
+      return;
+    }
 
     setLoading(true);
     setError({});
@@ -28,12 +40,12 @@ function Register() {
     };
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/v1/register/",
+      const response = await axiosInstance.post(
+        '/register/',
         userData,
         {
           timeout: 10000,
-        },
+        }
       );
 
       console.log("Registration successful:", response.data);
@@ -42,15 +54,15 @@ function Register() {
       setUsername("");
       setEmail("");
       setPassword("");
+      setConfirmPassword("");
 
-      // Clear validation errors and show success
       setError({});
       setSuccess(true);
+      navigate("/login", { replace: true });
     } catch (e) {
       console.error("Registration failed:", e.message);
 
       if (e.response) {
-        // Django returned validation or server errors
         const data = e.response.data;
 
         if (data && typeof data === "object" && !Array.isArray(data)) {
@@ -75,9 +87,8 @@ function Register() {
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-center flex-grow-1 py-4 ">
-
-      <div className="col-11 col-sm-8 col-md-5 col-lg-4 bg-light-dark p-4 p-md-5 ">
+    <div className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
+      <div className="col-11 col-sm-8 col-md-5 col-lg-4 bg-light-dark p-4 p-md-5 rounded-4">
         <h3 className="text-light text-center fw-bold mb-4">
           Create an Account
         </h3>
@@ -154,6 +165,25 @@ function Register() {
                 {Array.isArray(error.password)
                   ? error.password.join(" ")
                   : error.password}
+              </div>
+            )}
+          </div>
+
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Confirm Your Password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+
+            {error.confirmPassword && (
+              <div className="text-danger small mt-1" role="alert">
+                {error.confirmPassword}
               </div>
             )}
           </div>
